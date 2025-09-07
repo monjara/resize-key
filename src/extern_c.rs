@@ -1,3 +1,5 @@
+#![allow(unsafe_op_in_unsafe_fn)]
+
 use std::{ffi::c_void, ptr::NonNull};
 
 use core_foundation::{
@@ -179,7 +181,10 @@ fn ax_bool(b: Boolean) -> bool {
     b != 0
 }
 
-unsafe fn get_ax<K: AxKind<Pod: Default>>(elem: AXUIElementRef, key: CFStringRef) -> Option<K::Pod> {
+unsafe fn get_ax<K: AxKind<Pod: Default>>(
+    elem: AXUIElementRef,
+    key: CFStringRef,
+) -> Option<K::Pod> {
     let raw = copy_attr(elem, key)?;
     let owned = OwnedAxValue::from_copy(raw)?;
 
