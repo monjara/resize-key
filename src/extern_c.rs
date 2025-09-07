@@ -10,18 +10,53 @@ use core_graphics::{
     geometry::{CGPoint, CGSize},
 };
 
-// ===== RAII Wrapper for AXValue =====
-struct AXValueWrapper(NonNull<c_void>);
+unsafe extern "C" {
+    fn AXIsProcessTrustedWithOptions(options: CFDictionaryRef) -> Boolean;
 
-impl AXValueWrapper {
-    unsafe fn new_cgpoint(point: CGPoint) -> Option<Self> {
-        let v = AXValueCreate(AXValueType::CGPoint, &point as *const _ as *const c_void);
+    pub(crate) fn AXUIElementCreateSystemWide() -> AXUIElementRef;
+    pub(crate) fn AXUIElementCreateApplication(pid: i32) -> AXUIElementRef;
+    pub(crate) fn AXUIElementCopyAttributeValue(
+        element: AXUIElementRef,
+        attribute: CFStringRef,
+        value: *mut CFTypeRef,
+    ) -> AXError;
+    pub(crate) fn AXUIElementSetAttributeValue(
+        element: AXUIElementRef,
+        attribute: CFStringRef,
+        value: CFTypeRef,
+    ) -> AXError;
+
+    pub(crate) fn AXValueCreate(value_type: AXValueType, value_ptr: *const c_void) -> CFTypeRef;
+    pub(crate) fn AXValueGetType(value: CFTypeRef) -> AXValueType;
+    pub(crate) fn AXValueGetValue(
+        value: CFTypeRef,
+        value_type: AXValueType,
+        value_ptr: *mut c_void,
+    ) -> Boolean;
+
+    // Functions to get AX constants from C
+    pub(crate) fn get_kAXFocusedApplicationAttribute() -> CFStringRef;
+    pub(crate) fn get_kAXFocusedWindowAttribute() -> CFStringRef;
+    pub(crate) fn get_kAXPositionAttribute() -> CFStringRef;
+    pub(crate) fn get_kAXSizeAttribute() -> CFStringRef;
+    fn get_kAXTrustedCheckOptionPrompt() -> CFStringRef;
+
+    // Additional functions for getting frontmost app
+    fn GetFrontProcess(psn: *mut ProcessSerialNumber) -> i32;
+    fn GetProcessPID(psn: *const ProcessSerialNumber, pid: *mut i32) -> i32;
+}
+
+// ===== RAII Wrapper for AXValue =====
+struct OwnedAxValue(NonNull<c_void>);
+
+impl OwnedAxValue {
+    unsafe fn new<T>(value_type: AXValueType, value: &T) -> Option<Self> {
+        let v = AXValueCreate(value_type, (value as *const T).cast());
         NonNull::new(v as *mut c_void).map(Self)
     }
 
-    unsafe fn new_cgsize(size: CGSize) -> Option<Self> {
-        let v = AXValueCreate(AXValueType::CGSize, &size as *const _ as *const c_void);
-        NonNull::new(v as *mut c_void).map(Self)
+    unsafe fn from_copy(value: CFTypeRef) -> Option<Self> {
+        NonNull::new(value as *mut c_void).map(Self)
     }
 
     fn as_ptr(&self) -> *const c_void {
@@ -29,7 +64,7 @@ impl AXValueWrapper {
     }
 }
 
-impl Drop for AXValueWrapper {
+impl Drop for OwnedAxValue {
     fn drop(&mut self) {
         unsafe {
             CFRelease(self.0.as_ptr() as _);
@@ -68,42 +103,6 @@ struct ProcessSerialNumber {
 #[allow(non_camel_case_types)]
 pub(crate) enum __AXUIElement {}
 pub(crate) type AXUIElementRef = *const __AXUIElement;
-
-unsafe extern "C" {
-    fn AXIsProcessTrustedWithOptions(options: CFDictionaryRef) -> Boolean;
-
-    pub(crate) fn AXUIElementCreateSystemWide() -> AXUIElementRef;
-    pub(crate) fn AXUIElementCreateApplication(pid: i32) -> AXUIElementRef;
-    pub(crate) fn AXUIElementCopyAttributeValue(
-        element: AXUIElementRef,
-        attribute: CFStringRef,
-        value: *mut CFTypeRef,
-    ) -> AXError;
-    pub(crate) fn AXUIElementSetAttributeValue(
-        element: AXUIElementRef,
-        attribute: CFStringRef,
-        value: CFTypeRef,
-    ) -> AXError;
-
-    pub(crate) fn AXValueCreate(value_type: AXValueType, value_ptr: *const c_void) -> CFTypeRef;
-    pub(crate) fn AXValueGetType(value: CFTypeRef) -> AXValueType;
-    pub(crate) fn AXValueGetValue(
-        value: CFTypeRef,
-        value_type: AXValueType,
-        value_ptr: *mut c_void,
-    ) -> Boolean;
-
-    // Functions to get AX constants from C
-    pub(crate) fn get_kAXFocusedApplicationAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXFocusedWindowAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXPositionAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXSizeAttribute() -> CFStringRef;
-    fn get_kAXTrustedCheckOptionPrompt() -> CFStringRef;
-
-    // Additional functions for getting frontmost app
-    fn GetFrontProcess(psn: *mut ProcessSerialNumber) -> i32;
-    fn GetProcessPID(psn: *const ProcessSerialNumber, pid: *mut i32) -> i32;
-}
 
 // ===== ユーティリティ =====
 pub(crate) unsafe fn cfstring_ref(s: CFStringRef) -> CFString {
@@ -159,50 +158,74 @@ pub(crate) unsafe fn get_focused_window() -> Option<AXUIElementRef> {
     Some(win_val as AXUIElementRef)
 }
 
-pub(crate) unsafe fn get_cgpoint(elem: AXUIElementRef, key: CFStringRef) -> Option<CGPoint> {
-    struct Guard(CFTypeRef);
-    impl Drop for Guard {
-        fn drop(&mut self) {
-            unsafe {
-                CFRelease(self.0 as _);
-            }
-        }
-    }
+trait AxKind {
+    type Pod; // 実データ型（CGPoint/CGSize）
+    const TYPE: AXValueType; // 対応する AXValueType
+}
 
-    let v = copy_attr(elem, key)?;
-    let _guard = Guard(v);
+struct AsCGPoint;
+impl AxKind for AsCGPoint {
+    type Pod = CGPoint;
+    const TYPE: AXValueType = AXValueType::CGPoint;
+}
 
-    let vt = AXValueGetType(v);
-    if vt != AXValueType::CGPoint {
+struct AsCGSize;
+impl AxKind for AsCGSize {
+    type Pod = CGSize;
+    const TYPE: AXValueType = AXValueType::CGSize;
+}
+
+fn ax_bool(b: Boolean) -> bool {
+    b != 0
+}
+
+unsafe fn get_ax<K: AxKind>(elem: AXUIElementRef, key: CFStringRef) -> Option<K::Pod>
+where
+    K::Pod: Default,
+{
+    let raw = copy_attr(elem, key)?;
+    let owned = OwnedAxValue::from_copy(raw)?;
+
+    if AXValueGetType(owned.as_ptr()) != K::TYPE {
         return None;
     }
 
-    let mut p = CGPoint::new(0.0, 0.0);
-    let ok = AXValueGetValue(v, AXValueType::CGPoint, &mut p as *mut _ as *mut c_void);
-    if ok != 0 { Some(p) } else { None }
+    let mut out = K::Pod::default();
+    if ax_bool(AXValueGetValue(
+        owned.as_ptr(),
+        K::TYPE,
+        (&mut out as *mut K::Pod).cast(),
+    )) {
+        Some(out)
+    } else {
+        None
+    }
+}
+
+pub(crate) unsafe fn get_cgpoint(elem: AXUIElementRef, key: CFStringRef) -> Option<CGPoint> {
+    get_ax::<AsCGPoint>(elem, key)
 }
 
 pub(crate) unsafe fn get_cgsize(elem: AXUIElementRef, key: CFStringRef) -> Option<CGSize> {
-    struct Guard(CFTypeRef);
-    impl Drop for Guard {
-        fn drop(&mut self) {
-            unsafe {
-                CFRelease(self.0 as _);
-            }
-        }
+    get_ax::<AsCGSize>(elem, key)
+}
+
+unsafe fn set_ax<T>(
+    value_type: AXValueType,
+    elem: AXUIElementRef,
+    key: CFStringRef,
+    value: T,
+) -> anyhow::Result<()> {
+    let ax_value = OwnedAxValue::new(value_type, &value)
+        .ok_or_else(|| anyhow::anyhow!("Failed to create AXValue for CGPoint"))?;
+
+    let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
+    if err == AXError::Success {
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("Failed to set ax attribute"))
     }
-
-    let v = copy_attr(elem, key)?;
-    let _guard = Guard(v);
-
-    let vt = AXValueGetType(v);
-    if vt != AXValueType::CGSize {
-        return None;
-    }
-
-    let mut s = CGSize::new(0.0, 0.0);
-    let ok = AXValueGetValue(v, AXValueType::CGSize, &mut s as *mut _ as *mut c_void);
-    if ok != 0 { Some(s) } else { None }
+    // ax_value は自動的にドロップされ、リソースが解放される
 }
 
 pub(crate) unsafe fn set_cgpoint(
@@ -210,27 +233,15 @@ pub(crate) unsafe fn set_cgpoint(
     key: CFStringRef,
     p: CGPoint,
 ) -> anyhow::Result<()> {
-    let ax_value = AXValueWrapper::new_cgpoint(p)
-        .ok_or_else(|| anyhow::anyhow!("Failed to create AXValue for CGPoint"))?;
-
-    let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
-    if err == AXError::Success {
-        Ok(())
-    } else {
-        Err(anyhow::anyhow!("Failed to set CGPoint attribute"))
-    }
-    // ax_value は自動的にドロップされ、リソースが解放される
+    set_ax(AXValueType::CGPoint, elem, key, p)
 }
 
-pub(crate) unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
-    let ax_value = match AXValueWrapper::new_cgsize(s) {
-        Some(value) => value,
-        None => return false,
-    };
-
-    let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
-    err == AXError::Success
-    // ax_value は自動的にドロップされ、リソースが解放される
+pub(crate) unsafe fn set_cgsize(
+    elem: AXUIElementRef,
+    key: CFStringRef,
+    s: CGSize,
+) -> anyhow::Result<()> {
+    set_ax(AXValueType::CGSize, elem, key, s)
 }
 
 pub(crate) fn ensure_ax_trusted() -> bool {
