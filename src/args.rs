@@ -73,12 +73,10 @@ pub(crate) fn parse_move(vals: &[String]) -> Result<Action, String> {
 }
 
 pub(crate) fn parse_resize(vals: &[String]) -> Result<Action, String> {
-    println!("vals: {:?}", vals);
     if vals.len() != 2 {
         return Err("needs: --resize <edge> <delta>".into());
     }
     let edge = Edge::from_str(&vals[0])?;
     let delta: f64 = vals[1].parse().map_err(|_| "DELTA must be an integer")?;
-    println!("delta: {}", delta);
     Ok(Action::Resize(edge, delta))
 }

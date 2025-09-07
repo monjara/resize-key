@@ -1,7 +1,6 @@
 mod args;
 mod extern_c;
 
-use anyhow::Ok;
 use clap::Parser;
 use core_graphics::geometry::{CGPoint, CGSize};
 
