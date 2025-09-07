@@ -217,7 +217,7 @@ unsafe fn set_ax<T>(
     value: T,
 ) -> anyhow::Result<()> {
     let ax_value = OwnedAxValue::new(value_type, &value)
-        .ok_or_else(|| anyhow::anyhow!("Failed to create AXValue for CGPoint"))?;
+        .ok_or_else(|| anyhow::anyhow!("Failed to create AXValue"))?;
 
     let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
     if err == AXError::Success {
@@ -228,20 +228,12 @@ unsafe fn set_ax<T>(
     // ax_value は自動的にドロップされ、リソースが解放される
 }
 
-pub(crate) unsafe fn set_cgpoint(
-    elem: AXUIElementRef,
-    key: CFStringRef,
-    p: CGPoint,
-) -> anyhow::Result<()> {
-    set_ax(AXValueType::CGPoint, elem, key, p)
+pub(crate) unsafe fn set_cgpoint(elem: AXUIElementRef, key: CFStringRef, p: CGPoint) -> bool {
+    set_ax(AXValueType::CGPoint, elem, key, p).is_ok()
 }
 
-pub(crate) unsafe fn set_cgsize(
-    elem: AXUIElementRef,
-    key: CFStringRef,
-    s: CGSize,
-) -> anyhow::Result<()> {
-    set_ax(AXValueType::CGSize, elem, key, s)
+pub(crate) unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
+    set_ax(AXValueType::CGSize, elem, key, s).is_ok()
 }
 
 pub(crate) fn ensure_ax_trusted() -> bool {
