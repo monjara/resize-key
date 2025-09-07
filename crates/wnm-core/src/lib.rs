@@ -1,1 +1,2 @@
-pub mod extern_c;
+pub mod hotkey;
+pub mod window;

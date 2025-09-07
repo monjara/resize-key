@@ -2,7 +2,7 @@ mod args;
 
 use clap::Parser;
 use core_graphics::geometry::{CGPoint, CGSize};
-use wnm_core::extern_c::{
+use wnm_core::window::{
     ensure_ax_trusted, get_cgpoint, get_cgsize, get_focused_window, get_kAXPositionAttribute,
     get_kAXSizeAttribute, set_cgpoint, set_cgsize,
 };
