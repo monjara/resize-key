@@ -1,11 +1,41 @@
-use std::ffi::c_void;
+use std::{ffi::c_void, ptr::NonNull};
 
 use core_foundation::{
     base::{CFRelease, TCFType},
     boolean::CFBoolean,
     string::CFString,
 };
-use core_graphics::display::{CFDictionary, CGPoint, CGSize};
+use core_graphics::{
+    display::CFDictionary,
+    geometry::{CGPoint, CGSize},
+};
+
+// ===== RAII Wrapper for AXValue =====
+struct AXValueWrapper(NonNull<c_void>);
+
+impl AXValueWrapper {
+    unsafe fn new_cgpoint(point: CGPoint) -> Option<Self> {
+        let v = AXValueCreate(AXValueType::CGPoint, &point as *const _ as *const c_void);
+        NonNull::new(v as *mut c_void).map(Self)
+    }
+
+    unsafe fn new_cgsize(size: CGSize) -> Option<Self> {
+        let v = AXValueCreate(AXValueType::CGSize, &size as *const _ as *const c_void);
+        NonNull::new(v as *mut c_void).map(Self)
+    }
+
+    fn as_ptr(&self) -> *const c_void {
+        self.0.as_ptr()
+    }
+}
+
+impl Drop for AXValueWrapper {
+    fn drop(&mut self) {
+        unsafe {
+            CFRelease(self.0.as_ptr() as _);
+        }
+    }
+}
 
 // ===== macOS AX API FFI =====
 #[repr(C)]
@@ -130,49 +160,77 @@ pub(crate) unsafe fn get_focused_window() -> Option<AXUIElementRef> {
 }
 
 pub(crate) unsafe fn get_cgpoint(elem: AXUIElementRef, key: CFStringRef) -> Option<CGPoint> {
+    struct Guard(CFTypeRef);
+    impl Drop for Guard {
+        fn drop(&mut self) {
+            unsafe {
+                CFRelease(self.0 as _);
+            }
+        }
+    }
+
     let v = copy_attr(elem, key)?;
+    let _guard = Guard(v);
+
     let vt = AXValueGetType(v);
     if vt != AXValueType::CGPoint {
-        CFRelease(v as _);
         return None;
     }
+
     let mut p = CGPoint::new(0.0, 0.0);
     let ok = AXValueGetValue(v, AXValueType::CGPoint, &mut p as *mut _ as *mut c_void);
-    CFRelease(v as _);
     if ok != 0 { Some(p) } else { None }
 }
 
 pub(crate) unsafe fn get_cgsize(elem: AXUIElementRef, key: CFStringRef) -> Option<CGSize> {
+    struct Guard(CFTypeRef);
+    impl Drop for Guard {
+        fn drop(&mut self) {
+            unsafe {
+                CFRelease(self.0 as _);
+            }
+        }
+    }
+
     let v = copy_attr(elem, key)?;
+    let _guard = Guard(v);
+
     let vt = AXValueGetType(v);
     if vt != AXValueType::CGSize {
-        CFRelease(v as _);
         return None;
     }
+
     let mut s = CGSize::new(0.0, 0.0);
     let ok = AXValueGetValue(v, AXValueType::CGSize, &mut s as *mut _ as *mut c_void);
-    CFRelease(v as _);
     if ok != 0 { Some(s) } else { None }
 }
 
-pub(crate) unsafe fn set_cgpoint(elem: AXUIElementRef, key: CFStringRef, p: CGPoint) -> bool {
-    let v = AXValueCreate(AXValueType::CGPoint, &p as *const _ as *const c_void);
-    if v.is_null() {
-        return false;
+pub(crate) unsafe fn set_cgpoint(
+    elem: AXUIElementRef,
+    key: CFStringRef,
+    p: CGPoint,
+) -> anyhow::Result<()> {
+    let ax_value = AXValueWrapper::new_cgpoint(p)
+        .ok_or_else(|| anyhow::anyhow!("Failed to create AXValue for CGPoint"))?;
+
+    let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
+    if err == AXError::Success {
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("Failed to set CGPoint attribute"))
     }
-    let err = AXUIElementSetAttributeValue(elem, key, v);
-    CFRelease(v as _);
-    err == AXError::Success
+    // ax_value は自動的にドロップされ、リソースが解放される
 }
 
 pub(crate) unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
-    let v = AXValueCreate(AXValueType::CGSize, &s as *const _ as *const c_void);
-    if v.is_null() {
-        return false;
-    }
-    let err = AXUIElementSetAttributeValue(elem, key, v);
-    CFRelease(v as _);
+    let ax_value = match AXValueWrapper::new_cgsize(s) {
+        Some(value) => value,
+        None => return false,
+    };
+
+    let err = AXUIElementSetAttributeValue(elem, key, ax_value.as_ptr());
     err == AXError::Success
+    // ax_value は自動的にドロップされ、リソースが解放される
 }
 
 pub(crate) fn ensure_ax_trusted() -> bool {

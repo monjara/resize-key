@@ -10,6 +10,7 @@ name = "wnm"
 path = "src/main.rs"
 
 [dependencies]
+anyhow = "1.0.99"
 core-foundation = "0.10.1"
 core-graphics = "0.25.0"
 
