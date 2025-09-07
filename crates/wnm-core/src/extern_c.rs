@@ -15,32 +15,32 @@ use core_graphics::{
 unsafe extern "C" {
     fn AXIsProcessTrustedWithOptions(options: CFDictionaryRef) -> Boolean;
 
-    pub(crate) fn AXUIElementCreateSystemWide() -> AXUIElementRef;
-    pub(crate) fn AXUIElementCreateApplication(pid: i32) -> AXUIElementRef;
-    pub(crate) fn AXUIElementCopyAttributeValue(
+    pub fn AXUIElementCreateSystemWide() -> AXUIElementRef;
+    pub fn AXUIElementCreateApplication(pid: i32) -> AXUIElementRef;
+    pub fn AXUIElementCopyAttributeValue(
         element: AXUIElementRef,
         attribute: CFStringRef,
         value: *mut CFTypeRef,
     ) -> AXError;
-    pub(crate) fn AXUIElementSetAttributeValue(
+    pub fn AXUIElementSetAttributeValue(
         element: AXUIElementRef,
         attribute: CFStringRef,
         value: CFTypeRef,
     ) -> AXError;
 
-    pub(crate) fn AXValueCreate(value_type: AXValueType, value_ptr: *const c_void) -> CFTypeRef;
-    pub(crate) fn AXValueGetType(value: CFTypeRef) -> AXValueType;
-    pub(crate) fn AXValueGetValue(
+    pub fn AXValueCreate(value_type: AXValueType, value_ptr: *const c_void) -> CFTypeRef;
+    pub fn AXValueGetType(value: CFTypeRef) -> AXValueType;
+    pub fn AXValueGetValue(
         value: CFTypeRef,
         value_type: AXValueType,
         value_ptr: *mut c_void,
     ) -> Boolean;
 
     // Functions to get AX constants from C
-    pub(crate) fn get_kAXFocusedApplicationAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXFocusedWindowAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXPositionAttribute() -> CFStringRef;
-    pub(crate) fn get_kAXSizeAttribute() -> CFStringRef;
+    pub fn get_kAXFocusedApplicationAttribute() -> CFStringRef;
+    pub fn get_kAXFocusedWindowAttribute() -> CFStringRef;
+    pub fn get_kAXPositionAttribute() -> CFStringRef;
+    pub fn get_kAXSizeAttribute() -> CFStringRef;
     fn get_kAXTrustedCheckOptionPrompt() -> CFStringRef;
 
     // Additional functions for getting frontmost app
@@ -103,11 +103,10 @@ struct ProcessSerialNumber {
 }
 
 #[allow(non_camel_case_types)]
-pub(crate) enum __AXUIElement {}
-pub(crate) type AXUIElementRef = *const __AXUIElement;
+pub enum __AXUIElement {}
+pub type AXUIElementRef = *const __AXUIElement;
 
-// ===== ユーティリティ =====
-pub(crate) unsafe fn cfstring_ref(s: CFStringRef) -> CFString {
+pub unsafe fn cfstring_ref(s: CFStringRef) -> CFString {
     // 定数 CFStringRef を安全にラップ
     CFString::wrap_under_get_rule(s as *const _)
 }
@@ -143,7 +142,7 @@ unsafe fn get_frontmost_app_pid() -> Option<i32> {
     Some(pid)
 }
 
-pub(crate) unsafe fn get_focused_window() -> Option<AXUIElementRef> {
+pub unsafe fn get_focused_window() -> Option<AXUIElementRef> {
     // Try method 1: Get focused app from system-wide element
     let sys = AXUIElementCreateSystemWide();
 
@@ -204,11 +203,11 @@ unsafe fn get_ax<K: AxKind<Pod: Default>>(
     }
 }
 
-pub(crate) unsafe fn get_cgpoint(elem: AXUIElementRef, key: CFStringRef) -> Option<CGPoint> {
+pub unsafe fn get_cgpoint(elem: AXUIElementRef, key: CFStringRef) -> Option<CGPoint> {
     get_ax::<AsCGPoint>(elem, key)
 }
 
-pub(crate) unsafe fn get_cgsize(elem: AXUIElementRef, key: CFStringRef) -> Option<CGSize> {
+pub unsafe fn get_cgsize(elem: AXUIElementRef, key: CFStringRef) -> Option<CGSize> {
     get_ax::<AsCGSize>(elem, key)
 }
 
@@ -230,15 +229,15 @@ unsafe fn set_ax<T: Copy>(
     // ax_value は自動的にドロップされ、リソースが解放される
 }
 
-pub(crate) unsafe fn set_cgpoint(elem: AXUIElementRef, key: CFStringRef, p: CGPoint) -> bool {
+pub unsafe fn set_cgpoint(elem: AXUIElementRef, key: CFStringRef, p: CGPoint) -> bool {
     set_ax(AXValueType::CGPoint, elem, key, p).is_ok()
 }
 
-pub(crate) unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
+pub unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
     set_ax(AXValueType::CGSize, elem, key, s).is_ok()
 }
 
-pub(crate) fn ensure_ax_trusted() -> bool {
+pub fn ensure_ax_trusted() -> bool {
     unsafe {
         // 許可ダイアログを出す
         let key = cfstring_ref(get_kAXTrustedCheckOptionPrompt());

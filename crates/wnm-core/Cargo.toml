@@ -1,0 +1,13 @@
+[package]
+name = "wnm-core"
+version = "0.1.0"
+build = "build.rs"
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+core-foundation.workspace = true
+core-graphics.workspace = true
+
+[build-dependencies]
+cc = "1.0"

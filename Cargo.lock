@@ -355,8 +355,17 @@ name = "wnm-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "cc",
  "clap",
+ "core-graphics",
+ "wnm-core",
+]
+
+[[package]]
+name = "wnm-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cc",
  "core-foundation",
  "core-graphics",
 ]

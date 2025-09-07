@@ -1,0 +1,15 @@
+[package]
+name = "wnm-cli"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "wnm"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+core-graphics.workspace = true
+wnm-core.workspace = true
+
+clap = { version = "4.5.47", features = ["derive"] }
