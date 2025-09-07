@@ -65,7 +65,7 @@ fn main() -> anyhow::Result<()> {
                         }
                         args::Edge::Top => {
                             if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
-                                let new_p = CGPoint::new(pos.x, pos.y + delta);
+                                let new_p = CGPoint::new(pos.x, pos.y - delta);
                                 let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
                                 CGSize::new(sz.width.max(1.0), (sz.height + delta).max(1.0))
                             } else {
