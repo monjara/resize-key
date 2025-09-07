@@ -68,7 +68,9 @@ pub(crate) fn parse_move(vals: &[String]) -> Result<Action, String> {
         return Err("needs: --move <dir> <step>".into());
     }
     let dir = Direction::from_str(&vals[0])?;
-    let step: f64 = vals[1].parse().map_err(|_| "STEP must be an integer")?;
+    let step: f64 = vals[1]
+        .parse()
+        .map_err(|_| "STEP must be a floating point number")?;
     Ok(Action::Move(dir, step))
 }
 
@@ -77,6 +79,8 @@ pub(crate) fn parse_resize(vals: &[String]) -> Result<Action, String> {
         return Err("needs: --resize <edge> <delta>".into());
     }
     let edge = Edge::from_str(&vals[0])?;
-    let delta: f64 = vals[1].parse().map_err(|_| "DELTA must be an integer")?;
+    let delta: f64 = vals[1]
+        .parse()
+        .map_err(|_| "DELTA must be a floating point number")?;
     Ok(Action::Resize(edge, delta))
 }
