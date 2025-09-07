@@ -3,6 +3,7 @@ name = "wnm-core"
 version = "0.1.0"
 build = "build.rs"
 edition.workspace = true
+publish = false
 
 [dependencies]
 anyhow.workspace = true
