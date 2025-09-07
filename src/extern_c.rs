@@ -179,10 +179,7 @@ fn ax_bool(b: Boolean) -> bool {
     b != 0
 }
 
-unsafe fn get_ax<K: AxKind>(elem: AXUIElementRef, key: CFStringRef) -> Option<K::Pod>
-where
-    K::Pod: Default,
-{
+unsafe fn get_ax<K: AxKind<Pod: Default>>(elem: AXUIElementRef, key: CFStringRef) -> Option<K::Pod> {
     let raw = copy_attr(elem, key)?;
     let owned = OwnedAxValue::from_copy(raw)?;
 
@@ -210,7 +207,7 @@ pub(crate) unsafe fn get_cgsize(elem: AXUIElementRef, key: CFStringRef) -> Optio
     get_ax::<AsCGSize>(elem, key)
 }
 
-unsafe fn set_ax<T>(
+unsafe fn set_ax<T: Copy>(
     value_type: AXValueType,
     elem: AXUIElementRef,
     key: CFStringRef,
