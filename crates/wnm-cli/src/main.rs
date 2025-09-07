@@ -1,16 +1,13 @@
 mod args;
-mod extern_c;
 
 use clap::Parser;
 use core_graphics::geometry::{CGPoint, CGSize};
-
-use crate::{
-    args::{Action, Args, parse_move, parse_resize},
-    extern_c::{
-        ensure_ax_trusted, get_cgpoint, get_cgsize, get_focused_window, get_kAXPositionAttribute,
-        get_kAXSizeAttribute, set_cgpoint, set_cgsize,
-    },
+use wnm_core::extern_c::{
+    ensure_ax_trusted, get_cgpoint, get_cgsize, get_focused_window, get_kAXPositionAttribute,
+    get_kAXSizeAttribute, set_cgpoint, set_cgsize,
 };
+
+use crate::args::{Action, Args, parse_move, parse_resize};
 
 fn main() -> anyhow::Result<()> {
     if !ensure_ax_trusted() {

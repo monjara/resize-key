@@ -1,19 +1,14 @@
-[package]
-name = "wnm-cli"
-version = "0.1.0"
+[workspace]
+resolver = "3"
+members = ["crates/wnm-cli","crates/wnm-core"]
+
+[workspace.package]
 edition = "2024"
-build = "build.rs"
 publish = false
 
-[[bin]]
-name = "wnm"
-path = "src/main.rs"
+[workspace.dependencies]
+wnm-core = { path = "crates/wnm-core" }
 
-[dependencies]
 anyhow = "1.0.99"
-clap = { version = "4.5.47", features = ["derive"] }
 core-foundation = "0.10.1"
 core-graphics = "0.25.0"
-
-[build-dependencies]
-cc = "1.0"
