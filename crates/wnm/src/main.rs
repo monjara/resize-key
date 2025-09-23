@@ -26,6 +26,7 @@ fn main() {
             ns_string!("q"),
         );
         menu.addItem(&quit);
+        item.setMenu(Some(&menu));
     }
 
     app.run();
