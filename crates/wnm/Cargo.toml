@@ -1,0 +1,15 @@
+[package]
+name = "wnm"
+version = "0.1.0"
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "wnm-app"
+path = "src/main.rs"
+
+[dependencies]
+objc2 = "0.6.2"
+objc2-app-kit = "0.3.1"
+objc2-foundation = "0.3.1"
+wnm-core.workspace = true
