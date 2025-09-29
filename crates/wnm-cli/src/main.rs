@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
             Action::Resize(edge, delta) => {
-                let _result = resize(edge.into(), delta);
+                resize(edge.into(), delta)?;
             }
         }
         // println!("Moved right by {step}pt and widened by {step}pt.");
