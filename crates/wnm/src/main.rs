@@ -48,7 +48,10 @@ fn main() {
         }
     });
 
-    let _result = hotkey_manager.register_all(&[l_l, d_d, u_u, r_r, r_l, u_d, d_u, l_r]);
+    if let Err(e) = hotkey_manager.register_all(&[l_l, d_d, u_u, r_r, r_l, u_d, d_u, l_r]) {
+        eprintln!("Failed to register hotkeys: {}", e);
+        std::process::exit(1);
+    }
 
     app.setActivationPolicy(NSApplicationActivationPolicy::Regular);
 
