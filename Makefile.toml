@@ -4,3 +4,7 @@ default_to_workspace = false
 [tasks.dev]
 command = "cargo"
 args = ["run", "--bin", "wnm-app"]
+
+[tasks.cli]
+command = "cargo"
+args = ["run", "--bin", "wnm", "--", "${@}"]

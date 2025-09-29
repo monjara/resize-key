@@ -30,6 +30,17 @@ pub(crate) enum Edge {
     Bottom,
 }
 
+impl From<Edge> for wnm_core::hotkey::Edge {
+    fn from(value: Edge) -> Self {
+        match value {
+            Edge::Left => wnm_core::hotkey::Edge::Left,
+            Edge::Right => wnm_core::hotkey::Edge::Right,
+            Edge::Top => wnm_core::hotkey::Edge::Top,
+            Edge::Bottom => wnm_core::hotkey::Edge::Bottom,
+        }
+    }
+}
+
 pub(crate) enum Action {
     Move(Direction, f64),
     Resize(Edge, f64),

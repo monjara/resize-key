@@ -1,10 +1,12 @@
 mod args;
 
 use clap::Parser;
-use core_graphics::geometry::{CGPoint, CGSize};
-use wnm_core::window::{
-    ensure_ax_trusted, get_cgpoint, get_cgsize, get_focused_window, get_kAXPositionAttribute,
-    get_kAXSizeAttribute, set_cgpoint, set_cgsize,
+use core_graphics::geometry::CGPoint;
+use wnm_core::{
+    hotkey::resize,
+    window::{
+        ensure_ax_trusted, get_cgpoint, get_focused_window, get_kAXPositionAttribute, set_cgpoint,
+    },
 };
 
 use crate::args::{Action, Args, parse_move, parse_resize};
@@ -46,36 +48,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
             Action::Resize(edge, delta) => {
-                if let Some(sz) = get_cgsize(win, get_kAXSizeAttribute()) {
-                    let new_s = match edge {
-                        args::Edge::Right => CGSize::new((sz.width + delta).max(1.0), sz.height),
-                        args::Edge::Left => {
-                            if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
-                                let new_p = CGPoint::new(pos.x + delta, pos.y);
-                                let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
-                                CGSize::new((sz.width - delta).max(1.0), sz.height)
-                            } else {
-                                eprintln!("Failed to get window position.");
-                                return Ok(());
-                            }
-                        }
-                        args::Edge::Top => {
-                            if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
-                                let new_p = CGPoint::new(pos.x, pos.y - delta);
-                                let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
-                                CGSize::new(sz.width.max(1.0), (sz.height + delta).max(1.0))
-                            } else {
-                                eprintln!("Failed to get window position.");
-                                return Ok(());
-                            }
-                        }
-                        args::Edge::Bottom => CGSize::new(sz.width, (sz.height + delta).max(1.0)),
-                    };
-                    let _ = set_cgsize(win, get_kAXSizeAttribute(), new_s);
-                    println!("Resized window to ({}, {}).", new_s.width, new_s.height);
-                } else {
-                    eprintln!("Failed to get window size.");
-                }
+                resize(edge.into(), delta)?;
             }
         }
         // println!("Moved right by {step}pt and widened by {step}pt.");
