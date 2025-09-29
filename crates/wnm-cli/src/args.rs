@@ -30,13 +30,13 @@ pub(crate) enum Edge {
     Bottom,
 }
 
-impl From<Edge> for wnm_core::hotkey::Edge {
+impl From<Edge> for wnm_core::frame::Edge {
     fn from(value: Edge) -> Self {
         match value {
-            Edge::Left => wnm_core::hotkey::Edge::Left,
-            Edge::Right => wnm_core::hotkey::Edge::Right,
-            Edge::Top => wnm_core::hotkey::Edge::Top,
-            Edge::Bottom => wnm_core::hotkey::Edge::Bottom,
+            Edge::Left => wnm_core::frame::Edge::Left,
+            Edge::Right => wnm_core::frame::Edge::Right,
+            Edge::Top => wnm_core::frame::Edge::Top,
+            Edge::Bottom => wnm_core::frame::Edge::Bottom,
         }
     }
 }

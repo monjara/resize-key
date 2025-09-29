@@ -1,2 +1,2 @@
-pub mod hotkey;
+pub mod frame;
 pub mod window;

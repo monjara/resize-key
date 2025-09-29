@@ -9,7 +9,7 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::ns_string;
-use wnm_core::hotkey::{Edge, resize};
+use wnm_core::frame::{Edge, resize};
 
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();

@@ -3,7 +3,7 @@ mod args;
 use clap::Parser;
 use core_graphics::geometry::CGPoint;
 use wnm_core::{
-    hotkey::resize,
+    frame::resize,
     window::{
         ensure_ax_trusted, get_cgpoint, get_focused_window, get_kAXPositionAttribute, set_cgpoint,
     },
