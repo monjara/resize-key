@@ -167,7 +167,11 @@ pub enum Direction {
     Down,
 }
 
-pub unsafe fn move_window(window: AXUIElementRef, direction: &Direction, step: f64) {
+pub unsafe fn move_window(
+    window: AXUIElementRef,
+    direction: &Direction,
+    step: f64,
+) -> anyhow::Result<()> {
     unsafe {
         if let Some(pos) = get_cgpoint(window, get_kAXPositionAttribute()) {
             let new_p = match direction {
@@ -178,8 +182,8 @@ pub unsafe fn move_window(window: AXUIElementRef, direction: &Direction, step: f
             };
             let _ = set_cgpoint(window, get_kAXPositionAttribute(), new_p);
             println!("Moved window to ({}, {}).", new_p.x, new_p.y);
-        } else {
-            eprintln!("Failed to get window position.");
         }
     }
+
+    Ok(())
 }
