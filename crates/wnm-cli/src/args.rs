@@ -23,6 +23,17 @@ pub(crate) enum Direction {
     Down,
 }
 
+impl From<Direction> for wnm_core::frame::Direction {
+    fn from(value: Direction) -> Self {
+        match value {
+            Direction::Right => wnm_core::frame::Direction::Right,
+            Direction::Left => wnm_core::frame::Direction::Left,
+            Direction::Up => wnm_core::frame::Direction::Up,
+            Direction::Down => wnm_core::frame::Direction::Down,
+        }
+    }
+}
+
 pub(crate) enum Edge {
     Left,
     Right,
