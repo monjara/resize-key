@@ -1,12 +1,9 @@
 mod args;
 
 use clap::Parser;
-use core_graphics::geometry::CGPoint;
 use wnm_core::{
-    frame::resize,
-    window::{
-        ensure_ax_trusted, get_cgpoint, get_focused_window, get_kAXPositionAttribute, set_cgpoint,
-    },
+    frame::{move_window, resize},
+    window::{ensure_ax_trusted, get_focused_window},
 };
 
 use crate::args::{Action, Args, parse_move, parse_resize};
@@ -33,25 +30,9 @@ fn main() -> anyhow::Result<()> {
         };
 
         match action {
-            Action::Move(direction, step) => {
-                if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
-                    let new_p = match direction {
-                        args::Direction::Right => CGPoint::new(pos.x + step, pos.y),
-                        args::Direction::Left => CGPoint::new(pos.x - step, pos.y),
-                        args::Direction::Up => CGPoint::new(pos.x, pos.y - step),
-                        args::Direction::Down => CGPoint::new(pos.x, pos.y + step),
-                    };
-                    let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
-                    println!("Moved window to ({}, {}).", new_p.x, new_p.y);
-                } else {
-                    eprintln!("Failed to get window position.");
-                }
-            }
-            Action::Resize(edge, delta) => {
-                resize(edge.into(), delta)?;
-            }
+            Action::Move(direction, step) => move_window(win, &direction.into(), step)?,
+            Action::Resize(edge, delta) => resize(edge.into(), delta)?,
         }
-        // println!("Moved right by {step}pt and widened by {step}pt.");
     }
     Ok(())
 }
