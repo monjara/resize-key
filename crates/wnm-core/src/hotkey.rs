@@ -1,5 +1,8 @@
 use anyhow::{anyhow, bail};
-use core_graphics::geometry;
+use core_graphics::{
+    display::{CGPoint, CGSize},
+    geometry,
+};
 
 use crate::window::{
     get_cgpoint, get_cgsize, get_focused_window, get_kAXPositionAttribute, get_kAXSizeAttribute,
@@ -47,32 +50,48 @@ pub fn set_frame(f: Frame) -> anyhow::Result<()> {
         Ok(())
     }
 }
-// 便利API（CLI/GUIから呼ぶ）
-pub fn move_by(dx: f64, dy: f64) -> anyhow::Result<()> {
-    let mut f = get_frame()?;
-    f.x += dx;
-    f.y += dy;
-    set_frame(f)
+
+pub enum Edge {
+    Left,
+    Right,
+    Top,
+    Bottom,
 }
-pub fn resize_from_left(delta: f64) -> anyhow::Result<()> {
-    let mut f = get_frame()?;
-    f.x -= delta;
-    f.w += delta;
-    set_frame(f)
-}
-pub fn resize_from_right(delta: f64) -> anyhow::Result<()> {
-    let mut f = get_frame()?;
-    f.w += delta;
-    set_frame(f)
-}
-pub fn resize_from_top(delta: f64) -> anyhow::Result<()> {
-    let mut f = get_frame()?;
-    f.h += delta;
-    set_frame(f)
-}
-pub fn resize_from_bottom(delta: f64) -> anyhow::Result<()> {
-    let mut f = get_frame()?;
-    f.y -= delta;
-    f.h += delta;
-    set_frame(f)
+
+pub fn resize(edge: Edge, delta: f64) -> anyhow::Result<()> {
+    unsafe {
+        let Some(win) = get_focused_window() else {
+            eprintln!("No focused window.");
+            return Ok(());
+        };
+        if let Some(sz) = get_cgsize(win, get_kAXSizeAttribute()) {
+            let new_s = match edge {
+                Edge::Right => CGSize::new((sz.width + delta).max(1.0), sz.height),
+                Edge::Left => {
+                    if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
+                        let new_p = CGPoint::new(pos.x + delta, pos.y);
+                        let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
+                        CGSize::new((sz.width - delta).max(1.0), sz.height)
+                    } else {
+                        eprintln!("Failed to get window position.");
+                        return Ok(());
+                    }
+                }
+                Edge::Top => {
+                    if let Some(pos) = get_cgpoint(win, get_kAXPositionAttribute()) {
+                        let new_p = CGPoint::new(pos.x, pos.y - delta);
+                        let _ = set_cgpoint(win, get_kAXPositionAttribute(), new_p);
+                        CGSize::new(sz.width.max(1.0), (sz.height + delta).max(1.0))
+                    } else {
+                        eprintln!("Failed to get window position.");
+                        return Ok(());
+                    }
+                }
+                Edge::Bottom => CGSize::new(sz.width, (sz.height + delta).max(1.0)),
+            };
+            let _ = set_cgsize(win, get_kAXSizeAttribute(), new_s);
+            println!("Resized window to ({}, {}).", new_s.width, new_s.height);
+        }
+    }
+    Ok(())
 }

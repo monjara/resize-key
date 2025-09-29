@@ -9,6 +9,7 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::ns_string;
+use wnm_core::hotkey::{Edge, resize};
 
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();
@@ -27,14 +28,54 @@ fn main() {
     type Handler = Box<dyn Fn() + Send + Sync + 'static>;
 
     let handlers: Arc<HashMap<u32, Handler>> = Arc::new(HashMap::from([
-        (l_l.id(), Box::new(|| println!("left left")) as Handler),
-        (d_d.id(), Box::new(|| println!("down down")) as Handler),
-        (u_u.id(), Box::new(|| println!("up up")) as Handler),
-        (r_r.id(), Box::new(|| println!("right right")) as Handler),
-        (r_l.id(), Box::new(|| println!("right left")) as Handler),
-        (u_d.id(), Box::new(|| println!("up down")) as Handler),
-        (d_u.id(), Box::new(|| println!("down up")) as Handler),
-        (l_r.id(), Box::new(|| println!("left right")) as Handler),
+        (
+            l_l.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Left, -100.);
+            }) as Handler,
+        ),
+        (
+            d_d.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Bottom, 100.);
+            }),
+        ),
+        (
+            u_u.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Top, 100.);
+            }),
+        ),
+        (
+            r_r.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Right, 100.);
+            }),
+        ),
+        (
+            r_l.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Right, -100.);
+            }),
+        ),
+        (
+            u_d.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Top, -100.);
+            }),
+        ),
+        (
+            d_u.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Bottom, -100.);
+            }),
+        ),
+        (
+            l_r.id(),
+            Box::new(|| {
+                let _ = resize(Edge::Left, 100.);
+            }),
+        ),
     ]));
 
     thread::spawn(move || {
