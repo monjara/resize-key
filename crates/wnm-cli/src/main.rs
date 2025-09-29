@@ -3,7 +3,7 @@ mod args;
 use clap::Parser;
 use wnm_core::{
     frame::{move_window, resize},
-    window::{ensure_ax_trusted, get_focused_window},
+    window::ensure_ax_trusted,
 };
 
 use crate::args::{Action, Args, parse_move, parse_resize};
@@ -24,13 +24,8 @@ fn main() -> anyhow::Result<()> {
     };
 
     unsafe {
-        let Some(win) = get_focused_window() else {
-            eprintln!("No focused window.");
-            return Ok(());
-        };
-
         match action {
-            Action::Move(direction, step) => move_window(win, &direction.into(), step)?,
+            Action::Move(direction, step) => move_window(&direction.into(), step)?,
             Action::Resize(edge, delta) => resize(edge.into(), delta)?,
         }
     }

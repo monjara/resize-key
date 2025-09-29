@@ -9,69 +9,97 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::ns_string;
-use wnm_core::frame::{Edge, resize};
+use wnm_core::frame::{Direction, Edge, move_window, resize};
 
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();
     let app = NSApplication::sharedApplication(mtm);
     let hotkey_manager = GlobalHotKeyManager::new().unwrap();
 
-    let l_l = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyH);
-    let d_d = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyJ);
-    let u_u = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyK);
-    let r_r = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyL);
-    let r_l = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyH);
-    let u_d = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyJ);
-    let d_u = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyK);
-    let l_r = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyL);
+    let resize_l_l = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyH);
+    let resize_d_d = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyJ);
+    let resize_u_u = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyK);
+    let resize_r_r = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyL);
+    let resize_r_l = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyH);
+    let resize_u_d = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyJ);
+    let resize_d_u = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyK);
+    let resize_l_r = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyL);
+    let move_l = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyH);
+    let move_r = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyL);
+    let move_u = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyK);
+    let move_d = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyJ);
 
     type Handler = Box<dyn Fn() + Send + Sync + 'static>;
 
     let handlers: Arc<HashMap<u32, Handler>> = Arc::new(HashMap::from([
         (
-            l_l.id(),
+            move_l.id(),
+            Box::new(|| unsafe {
+                let _ = move_window(&Direction::Left, 50.);
+            }) as Handler,
+        ),
+        (
+            move_r.id(),
+            Box::new(|| unsafe {
+                let _ = move_window(&Direction::Right, 50.);
+            }) as Handler,
+        ),
+        (
+            move_u.id(),
+            Box::new(|| unsafe {
+                let _ = move_window(&Direction::Up, 50.);
+            }) as Handler,
+        ),
+        (
+            move_d.id(),
+            Box::new(|| unsafe {
+                let _ = move_window(&Direction::Down, 50.);
+            }) as Handler,
+        ),
+        (
+            resize_l_l.id(),
             Box::new(|| {
                 let _ = resize(Edge::Left, -100.);
             }) as Handler,
         ),
         (
-            d_d.id(),
+            resize_d_d.id(),
             Box::new(|| {
                 let _ = resize(Edge::Bottom, 100.);
             }),
         ),
         (
-            u_u.id(),
+            resize_u_u.id(),
             Box::new(|| {
                 let _ = resize(Edge::Top, 100.);
             }),
         ),
         (
-            r_r.id(),
+            resize_r_r.id(),
             Box::new(|| {
                 let _ = resize(Edge::Right, 100.);
             }),
         ),
         (
-            r_l.id(),
+            resize_r_l.id(),
             Box::new(|| {
                 let _ = resize(Edge::Right, -100.);
             }),
         ),
         (
-            u_d.id(),
+            resize_u_d.id(),
             Box::new(|| {
                 let _ = resize(Edge::Top, -100.);
             }),
         ),
         (
-            d_u.id(),
+            resize_d_u.id(),
             Box::new(|| {
                 let _ = resize(Edge::Bottom, -100.);
             }),
         ),
         (
-            l_r.id(),
+            resize_l_r.id(),
             Box::new(|| {
                 let _ = resize(Edge::Left, 100.);
             }),
@@ -89,7 +117,10 @@ fn main() {
         }
     });
 
-    if let Err(e) = hotkey_manager.register_all(&[l_l, d_d, u_u, r_r, r_l, u_d, d_u, l_r]) {
+    if let Err(e) = hotkey_manager.register_all(&[
+        resize_l_l, resize_d_d, resize_u_u, resize_r_r, resize_r_l, resize_u_d, resize_d_u,
+        resize_l_r, move_l, move_r, move_u, move_d,
+    ]) {
         eprintln!("Failed to register hotkeys: {}", e);
         std::process::exit(1);
     }
