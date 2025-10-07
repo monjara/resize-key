@@ -1,3 +1,4 @@
+mod preferences;
 use std::{collections::HashMap, sync::Arc, thread};
 
 use global_hotkey::{
@@ -11,11 +12,17 @@ use objc2_app_kit::{
 use objc2_foundation::ns_string;
 use wnm_core::frame::{Direction, Edge, move_window, resize};
 
+use crate::preferences::Preferences;
+
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();
     let app = NSApplication::sharedApplication(mtm);
     let hotkey_manager = GlobalHotKeyManager::new().unwrap();
+    let preferences = Preferences::new();
+    println!("Preferences: {:#?}", preferences);
 
+    // todo
+    let resize_step = 100.;
     let resize_l_l = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyH);
     let resize_d_d = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyJ);
     let resize_u_u = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyK);
@@ -24,6 +31,7 @@ fn main() {
     let resize_u_d = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyJ);
     let resize_d_u = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyK);
     let resize_l_r = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyL);
+    let move_step = 50.;
     let move_l = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyH);
     let move_r = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyL);
     let move_u = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyK);
@@ -34,74 +42,74 @@ fn main() {
     let handlers: Arc<HashMap<u32, Handler>> = Arc::new(HashMap::from([
         (
             move_l.id(),
-            Box::new(|| unsafe {
-                let _ = move_window(&Direction::Left, 50.);
+            Box::new(move || unsafe {
+                let _ = move_window(&Direction::Left, move_step);
             }) as Handler,
         ),
         (
             move_r.id(),
-            Box::new(|| unsafe {
-                let _ = move_window(&Direction::Right, 50.);
+            Box::new(move || unsafe {
+                let _ = move_window(&Direction::Right, move_step);
             }) as Handler,
         ),
         (
             move_u.id(),
-            Box::new(|| unsafe {
-                let _ = move_window(&Direction::Up, 50.);
+            Box::new(move || unsafe {
+                let _ = move_window(&Direction::Up, move_step);
             }) as Handler,
         ),
         (
             move_d.id(),
-            Box::new(|| unsafe {
-                let _ = move_window(&Direction::Down, 50.);
+            Box::new(move || unsafe {
+                let _ = move_window(&Direction::Down, move_step);
             }) as Handler,
         ),
         (
             resize_l_l.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Left, -100.);
+            Box::new(move || {
+                let _ = resize(Edge::Left, -resize_step);
             }) as Handler,
         ),
         (
             resize_d_d.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Bottom, 100.);
+            Box::new(move || {
+                let _ = resize(Edge::Bottom, resize_step);
             }),
         ),
         (
             resize_u_u.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Top, 100.);
+            Box::new(move || {
+                let _ = resize(Edge::Top, resize_step);
             }),
         ),
         (
             resize_r_r.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Right, 100.);
+            Box::new(move || {
+                let _ = resize(Edge::Right, resize_step);
             }),
         ),
         (
             resize_r_l.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Right, -100.);
+            Box::new(move || {
+                let _ = resize(Edge::Right, -resize_step);
             }),
         ),
         (
             resize_u_d.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Top, -100.);
+            Box::new(move || {
+                let _ = resize(Edge::Top, -resize_step);
             }),
         ),
         (
             resize_d_u.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Bottom, -100.);
+            Box::new(move || {
+                let _ = resize(Edge::Bottom, -resize_step);
             }),
         ),
         (
             resize_l_r.id(),
-            Box::new(|| {
-                let _ = resize(Edge::Left, 100.);
+            Box::new(move || {
+                let _ = resize(Edge::Left, resize_step);
             }),
         ),
     ]));
