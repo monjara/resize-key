@@ -22,7 +22,7 @@ fn main() {
     println!("Preferences: {:#?}", preferences);
 
     // todo
-    let resize_step = 100.;
+    let resize_step = preferences.resize_step;
     let resize_l_l = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyH);
     let resize_d_d = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyJ);
     let resize_u_u = HotKey::new(Some(Modifiers::META | Modifiers::SHIFT), Code::KeyK);
@@ -31,7 +31,7 @@ fn main() {
     let resize_u_d = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyJ);
     let resize_d_u = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyK);
     let resize_l_r = HotKey::new(Some(Modifiers::META | Modifiers::CONTROL), Code::KeyL);
-    let move_step = 50.;
+    let move_step = preferences.move_step;
     let move_l = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyH);
     let move_r = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyL);
     let move_u = HotKey::new(Some(Modifiers::ALT | Modifiers::CONTROL), Code::KeyK);

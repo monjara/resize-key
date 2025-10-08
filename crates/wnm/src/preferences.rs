@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_JSONC: &'static [u8] = include_bytes!("data/default.jsonc");
+const DEFAULT_JSONC: &[u8] = include_bytes!("data/default.jsonc");
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Binding {
-    action: String,
-    key: String,
+    pub(crate) action: String,
+    pub(crate) key: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Preferences {
-    move_step: f64,
-    resize_step: f64,
-    bindings: Vec<Binding>,
+    pub(crate) move_step: f64,
+    pub(crate) resize_step: f64,
+    pub(crate) bindings: Vec<Binding>,
 }
 
 impl Preferences {
@@ -36,8 +36,6 @@ impl Preferences {
     }
 
     fn load_default() -> Self {
-        let pref: Preferences =
-            serde_json::from_slice(DEFAULT_JSONC).expect("Cannot parse default.jsonc");
-        pref
+        serde_json::from_slice(DEFAULT_JSONC).expect("Cannot parse default.jsonc")
     }
 }
