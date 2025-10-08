@@ -1,0 +1,54 @@
+{
+  "move_step": 50.0,
+  "resize_step": 100.0,
+  "bindings": [
+    {
+      "action": "move_left",
+      "key": "ctrl+alt+h"
+    },
+    {
+      "action": "move_right",
+      "key": "ctrl+alt+l"
+    },
+    {
+      "action": "move_up",
+      "key": "ctrl+alt+k"
+    },
+    {
+      "action": "move_down",
+      "key": "ctrl+alt+j"
+    },
+    {
+      "action": "resize_left_to_left",
+      "key": "meta+shift+h"
+    },
+    {
+      "action": "resize_left_to_right",
+      "key": "meta+control+l"
+    },
+    {
+      "action": "resize_top_to_top",
+      "key": "meta+shift+k"
+    },
+    {
+      "action": "resize_top_to_bottom",
+      "key": "meta+control+j"
+    },
+    {
+      "action": "resize_right_to_left",
+      "key": "meta+control+h"
+    },
+    {
+      "action": "resize_right_to_right",
+      "key": "meta+shift+l"
+    },
+    {
+      "action": "resize_bottom_to_top",
+      "key": "meta+control+k"
+    },
+    {
+      "action": "resize_bottom_to_bottom",
+      "key": "meta+shift+j"
+    }
+  ]
+}
