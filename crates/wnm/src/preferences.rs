@@ -4,7 +4,7 @@ const DEFAULT_JSONC: &[u8] = include_bytes!("data/default.jsonc");
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Binding {
-    pub(crate) action: String,
+    pub(crate) operation: String,
     pub(crate) key: String,
 }
 

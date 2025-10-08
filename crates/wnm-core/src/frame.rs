@@ -167,7 +167,7 @@ pub enum Direction {
     Down,
 }
 
-pub unsafe fn move_window(direction: &Direction, step: f64) -> anyhow::Result<()> {
+pub fn move_window(direction: &Direction, step: f64) -> anyhow::Result<()> {
     unsafe {
         let window = get_focused_window().ok_or_else(|| anyhow!("No focused window"))?;
         if let Some(pos) = get_cgpoint(window, get_kAXPositionAttribute()) {
