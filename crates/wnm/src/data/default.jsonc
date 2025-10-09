@@ -3,52 +3,52 @@
   "resize_step": 100.0,
   "bindings": [
     {
-      "action": "move_left",
-      "key": "ctrl+alt+h"
+      "operation": "move_left",
+      "key": "command+option+h"
     },
     {
-      "action": "move_right",
-      "key": "ctrl+alt+l"
+      "operation": "move_right",
+      "key": "command+option+l"
     },
     {
-      "action": "move_up",
-      "key": "ctrl+alt+k"
+      "operation": "move_up",
+      "key": "command+option+k"
     },
     {
-      "action": "move_down",
-      "key": "ctrl+alt+j"
+      "operation": "move_down",
+      "key": "command+option+j"
     },
     {
-      "action": "resize_left_to_left",
-      "key": "meta+shift+h"
+      "operation": "resize_left_to_left",
+      "key": "option+shift+h"
     },
     {
-      "action": "resize_left_to_right",
-      "key": "meta+control+l"
+      "operation": "resize_left_to_right",
+      "key": "option+control+l"
     },
     {
-      "action": "resize_top_to_top",
-      "key": "meta+shift+k"
+      "operation": "resize_top_to_top",
+      "key": "option+shift+k"
     },
     {
-      "action": "resize_top_to_bottom",
-      "key": "meta+control+j"
+      "operation": "resize_top_to_bottom",
+      "key": "option+control+j"
     },
     {
-      "action": "resize_right_to_left",
-      "key": "meta+control+h"
+      "operation": "resize_right_to_left",
+      "key": "option+control+h"
     },
     {
-      "action": "resize_right_to_right",
-      "key": "meta+shift+l"
+      "operation": "resize_right_to_right",
+      "key": "option+shift+l"
     },
     {
-      "action": "resize_bottom_to_top",
-      "key": "meta+control+k"
+      "operation": "resize_bottom_to_top",
+      "key": "option+control+k"
     },
     {
-      "action": "resize_bottom_to_bottom",
-      "key": "meta+shift+j"
+      "operation": "resize_bottom_to_bottom",
+      "key": "option+shift+j"
     }
   ]
 }
