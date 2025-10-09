@@ -2,6 +2,41 @@ use serde::{Deserialize, Serialize};
 
 const DEFAULT_JSONC: &[u8] = include_bytes!("data/default.jsonc");
 
+pub(crate) enum Operation {
+    MoveLeft,
+    MoveRight,
+    MoveUp,
+    MoveDown,
+    ResizeLeftToLeft,
+    ResizeLeftToRight,
+    ResizeTopToTop,
+    ResizeTopToBottom,
+    ResizeRightToLeft,
+    ResizeRightToRight,
+    ResizeBottomToTop,
+    ResizeBottomToBottom,
+}
+
+impl From<&str> for Operation {
+    fn from(s: &str) -> Self {
+        match s {
+            "move_left" => Operation::MoveLeft,
+            "move_right" => Operation::MoveRight,
+            "move_up" => Operation::MoveUp,
+            "move_down" => Operation::MoveDown,
+            "resize_left_to_left" => Operation::ResizeLeftToLeft,
+            "resize_left_to_right" => Operation::ResizeLeftToRight,
+            "resize_top_to_top" => Operation::ResizeTopToTop,
+            "resize_top_to_bottom" => Operation::ResizeTopToBottom,
+            "resize_right_to_left" => Operation::ResizeRightToLeft,
+            "resize_right_to_right" => Operation::ResizeRightToRight,
+            "resize_bottom_to_top" => Operation::ResizeBottomToTop,
+            "resize_bottom_to_bottom" => Operation::ResizeBottomToBottom,
+            _ => panic!("Unknown operation: {}", s),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Binding {
     pub(crate) operation: String,

@@ -9,7 +9,7 @@ use objc2_app_kit::{
 use objc2_foundation::ns_string;
 use wnm_core::frame::{Direction, Edge, move_window, resize};
 
-use crate::preferences::Preferences;
+use crate::preferences::{Operation, Preferences};
 
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();
@@ -24,141 +24,112 @@ fn main() {
     let mut handlers: HashMap<u32, Handler> = HashMap::new();
 
     for binding in &preferences.bindings {
-        let op = binding.operation.as_str();
+        let op: Operation = binding.operation.as_str().into();
         let key = binding.key.as_str();
+        let Ok(key) = HotKey::from_str(key) else {
+            eprintln!("Invalid key: {}", key);
+            continue;
+        };
 
-        if op == "move_left" {
-            if let Ok(key) = HotKey::from_str(key) {
+        match op {
+            Operation::MoveLeft => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = move_window(&Direction::Left, move_step);
                     }) as Handler,
                 );
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "move_right" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::MoveRight => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = move_window(&Direction::Right, move_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "move_up" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::MoveUp => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = move_window(&Direction::Up, move_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "move_down" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::MoveDown => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = move_window(&Direction::Down, move_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_left_to_left" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeLeftToLeft => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Left, -resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_left_to_right" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeLeftToRight => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Left, resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_right_to_right" {
-            if let Ok(key) = HotKey::from_str(key) {
-                handlers.insert(
-                    key.id(),
-                    Box::new(move || {
-                        let _ = resize(Edge::Right, resize_step);
-                    }) as Handler,
-                );
-
-                hotkey_manager.register(key).unwrap();
-            }
-        } else if op == "resize_right_to_left" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeRightToLeft => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Right, -resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_top_to_top" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeRightToRight => {
+                handlers.insert(
+                    key.id(),
+                    Box::new(move || {
+                        let _ = resize(Edge::Right, resize_step);
+                    }) as Handler,
+                );
+            }
+            Operation::ResizeTopToTop => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Top, resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_top_to_bottom" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeTopToBottom => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Top, -resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_bottom_to_bottom" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeBottomToBottom => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Bottom, -resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
-        } else if op == "resize_bottom_to_top" {
-            if let Ok(key) = HotKey::from_str(key) {
+            Operation::ResizeBottomToTop => {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
                         let _ = resize(Edge::Bottom, resize_step);
                     }) as Handler,
                 );
-
-                hotkey_manager.register(key).unwrap();
             }
         }
+        hotkey_manager.register(key).unwrap();
     }
 
     let handlers = Arc::new(handlers);
