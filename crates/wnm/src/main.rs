@@ -149,10 +149,10 @@ fn main() {
 
     unsafe {
         let status_bar = NSStatusBar::systemStatusBar();
-        let item = status_bar.statusItemWithLength(40.);
+        let item = status_bar.statusItemWithLength(20.);
 
         if let Some(button) = item.button(mtm) {
-            button.setTitle(ns_string!("hello"));
+            button.setTitle(ns_string!("⇄"));
         }
 
         let menu = NSMenu::new(mtm);
