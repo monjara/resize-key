@@ -94,10 +94,10 @@ pub fn resize(edge: Edge, delta: f64) -> anyhow::Result<()> {
             .ok_or_else(|| anyhow!("Failed to get window size"))?;
 
         let new_size = match edge {
-            Edge::Right => resize_right(current_size, delta),
+            Edge::Right => resize_right(current_size, delta)?,
             Edge::Left => resize_left(win, current_size, delta)?,
             Edge::Top => resize_top(win, current_size, delta)?,
-            Edge::Bottom => resize_bottom(current_size, delta),
+            Edge::Bottom => resize_bottom(current_size, delta)?,
         };
 
         if !set_cgsize(win, get_kAXSizeAttribute(), new_size) {
@@ -112,11 +112,11 @@ pub fn resize(edge: Edge, delta: f64) -> anyhow::Result<()> {
     }
 }
 
-fn resize_right(current_size: CGSize, delta: f64) -> CGSize {
-    CGSize::new(
+fn resize_right(current_size: CGSize, delta: f64) -> anyhow::Result<CGSize> {
+    Ok(CGSize::new(
         (current_size.width + delta).max(MIN_WINDOW_SIZE),
         current_size.height,
-    )
+    ))
 }
 
 fn resize_left(win: AXUIElementRef, current_size: CGSize, delta: f64) -> anyhow::Result<CGSize> {
@@ -153,11 +153,11 @@ fn resize_top(win: AXUIElementRef, current_size: CGSize, delta: f64) -> anyhow::
     }
 }
 
-fn resize_bottom(current_size: CGSize, delta: f64) -> CGSize {
-    CGSize::new(
+fn resize_bottom(current_size: CGSize, delta: f64) -> anyhow::Result<CGSize> {
+    Ok(CGSize::new(
         current_size.width,
         (current_size.height + delta).max(MIN_WINDOW_SIZE),
-    )
+    ))
 }
 
 pub enum Direction {
@@ -183,4 +183,52 @@ pub fn move_window(direction: &Direction, step: f64) -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+/// NSWindow-style setFrame function using Accessibility API
+/// This allows setting both position and size in one call, similar to NSWindow.setFrame
+pub fn set_window_frame(origin: CGPoint, size: CGSize) -> anyhow::Result<()> {
+    unsafe {
+        let window = get_focused_window().ok_or_else(|| anyhow!("No focused window"))?;
+
+        // Set size first, then position (similar to NSWindow behavior)
+        if !set_cgsize(window, get_kAXSizeAttribute(), size) {
+            bail!("Failed to set window size");
+        }
+
+        if !set_cgpoint(window, get_kAXPositionAttribute(), origin) {
+            bail!("Failed to set window position");
+        }
+
+        println!(
+            "Set window frame to origin:({}, {}) size:({}, {})",
+            origin.x, origin.y, size.width, size.height
+        );
+    }
+
+    Ok(())
+}
+
+/// Move window using NSWindow-style approach with Accessibility API
+pub fn move_window_nswindow_style(direction: &Direction, step: f64) -> anyhow::Result<()> {
+    unsafe {
+        let window = get_focused_window().ok_or_else(|| anyhow!("No focused window"))?;
+
+        // Get current position and size
+        let current_pos = get_cgpoint(window, get_kAXPositionAttribute())
+            .ok_or_else(|| anyhow!("Failed to get window position"))?;
+        let current_size = get_cgsize(window, get_kAXSizeAttribute())
+            .ok_or_else(|| anyhow!("Failed to get window size"))?;
+
+        // Calculate new position based on direction
+        let new_pos = match direction {
+            Direction::Right => CGPoint::new(current_pos.x + step, current_pos.y),
+            Direction::Left => CGPoint::new(current_pos.x - step, current_pos.y),
+            Direction::Up => CGPoint::new(current_pos.x, current_pos.y - step),
+            Direction::Down => CGPoint::new(current_pos.x, current_pos.y + step),
+        };
+
+        // Use the setFrame-style function
+        set_window_frame(new_pos, current_size)
+    }
 }

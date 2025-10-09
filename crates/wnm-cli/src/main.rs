@@ -23,11 +23,9 @@ fn main() -> anyhow::Result<()> {
         (Some(_), Some(_)) => return Err(anyhow::Error::msg("use only one of --move or --resize")),
     };
 
-    unsafe {
-        match action {
-            Action::Move(direction, step) => move_window(&direction.into(), step)?,
-            Action::Resize(edge, delta) => resize(edge.into(), delta)?,
-        }
+    match action {
+        Action::Move(direction, step) => move_window(&direction.into(), step)?,
+        Action::Resize(edge, delta) => resize(edge.into(), delta)?,
     }
     Ok(())
 }

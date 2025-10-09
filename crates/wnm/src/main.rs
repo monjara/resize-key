@@ -7,7 +7,7 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::ns_string;
-use wnm_core::frame::{Direction, Edge, move_window, resize};
+use wnm_core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 
 use crate::preferences::{Operation, Preferences};
 
@@ -36,7 +36,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = move_window(&Direction::Left, move_step);
+                        let _ = move_window_nswindow_style(&Direction::Left, move_step);
                     }) as Handler,
                 );
             }
@@ -44,7 +44,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = move_window(&Direction::Right, move_step);
+                        let _ = move_window_nswindow_style(&Direction::Right, move_step);
                     }) as Handler,
                 );
             }
@@ -52,7 +52,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = move_window(&Direction::Up, move_step);
+                        let _ = move_window_nswindow_style(&Direction::Up, move_step);
                     }) as Handler,
                 );
             }
@@ -60,7 +60,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = move_window(&Direction::Down, move_step);
+                        let _ = move_window_nswindow_style(&Direction::Down, move_step);
                     }) as Handler,
                 );
             }
@@ -116,7 +116,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = resize(Edge::Bottom, -resize_step);
+                        let _ = resize(Edge::Bottom, resize_step);
                     }) as Handler,
                 );
             }
@@ -124,7 +124,7 @@ fn main() {
                 handlers.insert(
                     key.id(),
                     Box::new(move || {
-                        let _ = resize(Edge::Bottom, resize_step);
+                        let _ = resize(Edge::Bottom, -resize_step);
                     }) as Handler,
                 );
             }
