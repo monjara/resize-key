@@ -3,8 +3,8 @@ default_to_workspace = false
 
 [tasks.dev]
 command = "cargo"
-args = ["run", "--bin", "wnm-app"]
+args = ["run", "--bin", "resize-key-app"]
 
 [tasks.cli]
 command = "cargo"
-args = ["run", "--bin", "wnm", "--", "${@}"]
+args = ["run", "--bin", "resize-key", "--", "${@}"]

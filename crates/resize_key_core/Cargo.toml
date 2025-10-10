@@ -1,5 +1,5 @@
 [package]
-name = "wnm-core"
+name = "resize_key_core"
 version = "0.1.0"
 build = "build.rs"
 edition.workspace = true
