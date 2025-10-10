@@ -1,7 +1,7 @@
 mod args;
 
 use clap::Parser;
-use wnm_core::{
+use resize_key_core::{
     frame::{move_window, resize},
     window::ensure_ax_trusted,
 };

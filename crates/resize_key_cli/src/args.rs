@@ -23,13 +23,13 @@ pub(crate) enum Direction {
     Down,
 }
 
-impl From<Direction> for wnm_core::frame::Direction {
+impl From<Direction> for resize_key_core::frame::Direction {
     fn from(value: Direction) -> Self {
         match value {
-            Direction::Right => wnm_core::frame::Direction::Right,
-            Direction::Left => wnm_core::frame::Direction::Left,
-            Direction::Up => wnm_core::frame::Direction::Up,
-            Direction::Down => wnm_core::frame::Direction::Down,
+            Direction::Right => resize_key_core::frame::Direction::Right,
+            Direction::Left => resize_key_core::frame::Direction::Left,
+            Direction::Up => resize_key_core::frame::Direction::Up,
+            Direction::Down => resize_key_core::frame::Direction::Down,
         }
     }
 }
@@ -41,13 +41,13 @@ pub(crate) enum Edge {
     Bottom,
 }
 
-impl From<Edge> for wnm_core::frame::Edge {
+impl From<Edge> for resize_key_core::frame::Edge {
     fn from(value: Edge) -> Self {
         match value {
-            Edge::Left => wnm_core::frame::Edge::Left,
-            Edge::Right => wnm_core::frame::Edge::Right,
-            Edge::Top => wnm_core::frame::Edge::Top,
-            Edge::Bottom => wnm_core::frame::Edge::Bottom,
+            Edge::Left => resize_key_core::frame::Edge::Left,
+            Edge::Right => resize_key_core::frame::Edge::Right,
+            Edge::Top => resize_key_core::frame::Edge::Top,
+            Edge::Bottom => resize_key_core::frame::Edge::Bottom,
         }
     }
 }

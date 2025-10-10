@@ -1,15 +1,15 @@
 [package]
-name = "wnm-cli"
+name = "resize_key_cli"
 version = "0.1.0"
 edition = "2024"
 publish = false
 
 [[bin]]
-name = "wnm"
+name = "resize-key"
 path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
-wnm-core.workspace = true
+resize_key_core.workspace = true
 
 clap = { version = "4.5.47", features = ["derive"] }

@@ -1,14 +1,18 @@
 [workspace]
 resolver = "3"
-members = ["crates/wnm", "crates/wnm-cli", "crates/wnm-core"]
-default-members = ["crates/wnm"]
+members = [
+  "crates/resize_key",
+  "crates/resize_key_cli",
+  "crates/resize_key_core",
+]
+default-members = ["crates/resize_key"]
 
 [workspace.package]
 edition = "2024"
 publish = false
 
 [workspace.dependencies]
-wnm-core = { path = "crates/wnm-core" }
+resize_key_core = { path = "crates/resize_key_core" }
 
 anyhow = "1.0.99"
 serde = { version = "1.0.228", features = ["derive"] }
