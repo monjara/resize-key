@@ -8,3 +8,28 @@ args = ["run", "--bin", "resize-key-app"]
 [tasks.cli]
 command = "cargo"
 args = ["run", "--bin", "resize-key", "--", "${@}"]
+
+[tasks.build-app]
+dependencies = ["build-1", "build-2"]
+
+[tasks.build-1]
+command = "cargo"
+args = [
+	"build",
+	"--release",
+	"--target",
+	"aarch64-apple-darwin",
+	"--package",
+	"resize_key",
+]
+
+[tasks.build-2]
+command = "cargo"
+args = [
+	"build",
+	"--release",
+	"--target",
+	"x86_64-apple-darwin",
+	"--package",
+	"resize_key",
+]

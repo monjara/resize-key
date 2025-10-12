@@ -4,8 +4,11 @@ version = "0.1.0"
 edition.workspace = true
 publish.workspace = true
 
+[package.metadata.bundle]
+name = "ResizeKey"
+
 [[bin]]
-name = "resize-key-app"
+name = "ResizeKey"
 path = "src/main.rs"
 
 [dependencies]

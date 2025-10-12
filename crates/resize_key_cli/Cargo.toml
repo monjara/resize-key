@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [[bin]]
-name = "resize-key"
+name = "resize"
 path = "src/main.rs"
 
 [dependencies]
