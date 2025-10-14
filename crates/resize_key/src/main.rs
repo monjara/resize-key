@@ -2,14 +2,25 @@ mod preferences;
 use std::{collections::HashMap, str::FromStr, sync::Arc, thread};
 
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, hotkey::HotKey};
-use objc2::{MainThreadMarker, MainThreadOnly, sel};
+use objc2::{AnyThread, MainThreadMarker, MainThreadOnly, rc::Retained, sel};
 use objc2_app_kit::{
-    NSApplication, NSApplicationActivationPolicy, NSMenu, NSMenuItem, NSStatusBar,
+    NSApplication, NSApplicationActivationPolicy, NSImage, NSMenu, NSMenuItem, NSStatusBar,
 };
-use objc2_foundation::ns_string;
+use objc2_foundation::{NSData, NSSize, ns_string};
 use resize_key_core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 
 use crate::preferences::{Operation, Preferences};
+
+const IMAGE_BYTES: &[u8] = include_bytes!("assets/mono_1.png");
+
+fn load_embedded_image() -> Option<Retained<NSImage>> {
+    unsafe {
+        let data =
+            NSData::dataWithBytes_length(IMAGE_BYTES.as_ptr() as *const _, IMAGE_BYTES.len() as _);
+        let image = NSImage::initWithData(NSImage::alloc(), &data)?;
+        Some(image)
+    }
+}
 
 fn main() {
     let mtm = MainThreadMarker::new().unwrap();
@@ -27,7 +38,6 @@ fn main() {
         let op: Operation = binding.operation.as_str().into();
         let key = binding.key.as_str();
         let Ok(key) = HotKey::from_str(key) else {
-            eprintln!("Invalid key: {}", key);
             continue;
         };
 
@@ -152,7 +162,12 @@ fn main() {
         let item = status_bar.statusItemWithLength(20.);
 
         if let Some(button) = item.button(mtm) {
-            button.setTitle(ns_string!("⇄"));
+            if let Some(image) = load_embedded_image() {
+                image.setSize(NSSize::new(24., 24.));
+                button.setImage(Some(&image));
+            } else {
+                button.setTitle(ns_string!("R"));
+            }
         }
 
         let menu = NSMenu::new(mtm);

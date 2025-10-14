@@ -3,7 +3,7 @@ default_to_workspace = false
 
 [tasks.dev]
 command = "cargo"
-args = ["run", "--bin", "resize-key-app"]
+args = ["run", "--bin", "ResizeKey"]
 
 [tasks.cli]
 command = "cargo"
