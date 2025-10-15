@@ -3,5 +3,5 @@
     "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>CFBundleName</key><string>axbar</string>
-  <key>LSUIElement</key><true />
+  <key>LSUIElement</key><string>1</string>
 </dict></plist>

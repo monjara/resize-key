@@ -1,13 +1,13 @@
 mod preferences;
 use std::{collections::HashMap, ffi::c_void, str::FromStr, sync::Arc, thread};
 
+use core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, hotkey::HotKey};
 use objc2::{AnyThread, MainThreadMarker, MainThreadOnly, rc::Retained, sel};
 use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSImage, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::{NSData, NSSize, ns_string};
-use core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 
 use crate::preferences::{Operation, Preferences};
 
@@ -158,7 +158,7 @@ fn main() {
         }
     });
 
-    app.setActivationPolicy(NSApplicationActivationPolicy::Regular);
+    app.setActivationPolicy(NSApplicationActivationPolicy::Accessory);
 
     unsafe {
         let status_bar = NSStatusBar::systemStatusBar();
