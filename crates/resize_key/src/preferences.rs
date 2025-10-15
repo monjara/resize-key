@@ -32,7 +32,7 @@ impl From<&str> for Operation {
             "resize_right_to_right" => Operation::ResizeRightToRight,
             "resize_bottom_to_top" => Operation::ResizeBottomToTop,
             "resize_bottom_to_bottom" => Operation::ResizeBottomToBottom,
-            _ => panic!("Unknown operation: {}", s),
+            _ => panic!("Unknown operation: {s}"),
         }
     }
 }
