@@ -133,6 +133,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b05b61dc5112cbb17e4b6cd61790d9845d13888356391624cbe7e41efeac1e75"
 
 [[package]]
+name = "core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cc",
+ "core-foundation",
+ "core-graphics",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -500,11 +510,11 @@ dependencies = [
 name = "resize_key"
 version = "0.1.0"
 dependencies = [
+ "core",
  "global-hotkey",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
- "resize_key_core",
  "serde",
  "serde_json",
 ]
@@ -515,17 +525,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "resize_key_core",
-]
-
-[[package]]
-name = "resize_key_core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cc",
- "core-foundation",
- "core-graphics",
+ "core",
 ]
 
 [[package]]

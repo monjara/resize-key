@@ -7,7 +7,7 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSImage, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::{NSData, NSSize, ns_string};
-use resize_key_core::frame::{Direction, Edge, move_window_nswindow_style, resize};
+use core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 
 use crate::preferences::{Operation, Preferences};
 
@@ -17,7 +17,7 @@ const ICON_SIZE: f64 = 24.0;
 fn load_embedded_image() -> Option<Retained<NSImage>> {
     unsafe {
         let data = NSData::dataWithBytes_length(
-            IMAGE_BYTES.as_ptr() as *const c_void,
+            IMAGE_BYTES.as_ptr().cast::<c_void>(),
             IMAGE_BYTES.len() as _,
         );
         let image = NSImage::initWithData(NSImage::alloc(), &data)?;
@@ -149,7 +149,7 @@ fn main() {
 
     thread::spawn(move || {
         let rx = GlobalHotKeyEvent::receiver();
-        for ev in rx.iter() {
+        for ev in rx {
             if ev.state == global_hotkey::HotKeyState::Pressed
                 && let Some(h) = handlers.get(&ev.id)
             {
