@@ -1,5 +1,5 @@
 mod preferences;
-use std::{collections::HashMap, str::FromStr, sync::Arc, thread};
+use std::{collections::HashMap, ffi::c_void, str::FromStr, sync::Arc, thread};
 
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, hotkey::HotKey};
 use objc2::{AnyThread, MainThreadMarker, MainThreadOnly, rc::Retained, sel};
@@ -12,11 +12,14 @@ use resize_key_core::frame::{Direction, Edge, move_window_nswindow_style, resize
 use crate::preferences::{Operation, Preferences};
 
 const IMAGE_BYTES: &[u8] = include_bytes!("assets/mono_1.png");
+const ICON_SIZE: f64 = 24.0;
 
 fn load_embedded_image() -> Option<Retained<NSImage>> {
     unsafe {
-        let data =
-            NSData::dataWithBytes_length(IMAGE_BYTES.as_ptr() as *const _, IMAGE_BYTES.len() as _);
+        let data = NSData::dataWithBytes_length(
+            IMAGE_BYTES.as_ptr() as *const c_void,
+            IMAGE_BYTES.len() as _,
+        );
         let image = NSImage::initWithData(NSImage::alloc(), &data)?;
         Some(image)
     }
@@ -163,7 +166,7 @@ fn main() {
 
         if let Some(button) = item.button(mtm) {
             if let Some(image) = load_embedded_image() {
-                image.setSize(NSSize::new(24., 24.));
+                image.setSize(NSSize::new(ICON_SIZE, ICON_SIZE));
                 button.setImage(Some(&image));
             } else {
                 button.setTitle(ns_string!("R"));
