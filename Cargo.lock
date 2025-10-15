@@ -510,6 +510,7 @@ dependencies = [
 name = "resize_key"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "core",
  "global-hotkey",
  "objc2",
