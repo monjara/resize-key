@@ -7,7 +7,7 @@ use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSImage, NSMenu, NSMenuItem, NSStatusBar,
 };
 use objc2_foundation::{NSData, NSSize, ns_string};
-use resize_key_core::frame::{Direction, Edge, move_window_nswindow_style, resize};
+use core::frame::{Direction, Edge, move_window_nswindow_style, resize};
 
 use crate::preferences::{Operation, Preferences};
 

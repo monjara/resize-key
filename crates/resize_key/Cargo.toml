@@ -14,6 +14,6 @@ objc2 = "0.6.2"
 objc2-app-kit = "0.3.1"
 objc2-foundation = "0.3.1"
 
-resize_key_core.workspace = true
+core.workspace = true
 serde.workspace = true
 serde_json.workspace = true

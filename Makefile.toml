@@ -15,21 +15,29 @@ dependencies = ["build-1", "build-2"]
 [tasks.build-1]
 command = "cargo"
 args = [
-	"build",
-	"--release",
-	"--target",
-	"aarch64-apple-darwin",
-	"--package",
-	"resize_key",
+  "build",
+  "--release",
+  "--target",
+  "aarch64-apple-darwin",
+  "--package",
+  "resize_key",
 ]
 
 [tasks.build-2]
 command = "cargo"
 args = [
-	"build",
-	"--release",
-	"--target",
-	"x86_64-apple-darwin",
-	"--package",
-	"resize_key",
+  "build",
+  "--release",
+  "--target",
+  "x86_64-apple-darwin",
+  "--package",
+  "resize_key",
 ]
+
+[tasks.fmt]
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy", "--fix", "--", "-W", "clippy::all", "-W", "clippy::pedantic"]
