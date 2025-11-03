@@ -1,9 +1,8 @@
-use std::{collections::HashMap, sync::Arc, thread};
-
-use core::frame::{Direction, Edge, move_window_nswindow_style, resize};
-use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, hotkey::HotKey};
-
+use crate::frame::{Direction, Edge, move_window_nswindow_style, resize};
 use crate::preferences::{Operation, Preferences};
+
+use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, hotkey::HotKey};
+use std::{collections::HashMap, sync::Arc, thread};
 
 pub struct HotkeyManager {
     manager: GlobalHotKeyManager,
@@ -88,13 +87,12 @@ impl HotkeyManager {
         thread::spawn(move || {
             let rx = GlobalHotKeyEvent::receiver();
             for event in rx {
-                if event.state == global_hotkey::HotKeyState::Pressed {
-                    if let Some(handler) = handlers.get(&event.id) {
-                        handler();
-                    }
+                if event.state == global_hotkey::HotKeyState::Pressed
+                    && let Some(handler) = handlers.get(&event.id)
+                {
+                    handler();
                 }
             }
         });
     }
 }
-
