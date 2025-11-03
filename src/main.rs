@@ -1,5 +1,7 @@
+mod frame;
 mod hotkey;
 mod preferences;
+mod window;
 use std::ffi::c_void;
 
 use crate::hotkey::HotkeyManager;
@@ -56,6 +58,14 @@ fn main() {
         }
 
         let menu = NSMenu::new(mtm);
+        let about = NSMenuItem::initWithTitle_action_keyEquivalent(
+            NSMenuItem::alloc(mtm),
+            ns_string!("About ResizeKey"),
+            Some(sel!(orderFrontStandardAboutPanel:)),
+            ns_string!(""),
+        );
+        menu.addItem(&about);
+
         let quit = NSMenuItem::initWithTitle_action_keyEquivalent(
             NSMenuItem::alloc(mtm),
             ns_string!("Quit"),

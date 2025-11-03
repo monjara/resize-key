@@ -2,19 +2,10 @@
 
 use std::{ffi::c_void, ptr::NonNull};
 
-use core_foundation::{
-    base::{CFRelease, TCFType},
-    boolean::CFBoolean,
-    string::CFString,
-};
-use core_graphics::{
-    display::CFDictionary,
-    geometry::{CGPoint, CGSize},
-};
+use core_foundation::base::CFRelease;
+use core_graphics::geometry::{CGPoint, CGSize};
 
 unsafe extern "C" {
-    fn AXIsProcessTrustedWithOptions(options: CFDictionaryRef) -> Boolean;
-
     pub fn AXUIElementCreateSystemWide() -> AXUIElementRef;
     pub fn AXUIElementCreateApplication(pid: i32) -> AXUIElementRef;
     pub fn AXUIElementCopyAttributeValue(
@@ -41,7 +32,6 @@ unsafe extern "C" {
     pub fn get_kAXFocusedWindowAttribute() -> CFStringRef;
     pub fn get_kAXPositionAttribute() -> CFStringRef;
     pub fn get_kAXSizeAttribute() -> CFStringRef;
-    fn get_kAXTrustedCheckOptionPrompt() -> CFStringRef;
 
     // Additional functions for getting frontmost app
     fn GetFrontProcess(psn: *mut ProcessSerialNumber) -> i32;
@@ -93,7 +83,6 @@ pub enum AXValueType {
 type Boolean = u8; // macOSのBooleanはUInt8
 type CFTypeRef = *const c_void;
 type CFStringRef = *const c_void;
-type CFDictionaryRef = *const c_void;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -105,11 +94,6 @@ struct ProcessSerialNumber {
 #[allow(non_camel_case_types)]
 pub enum __AXUIElement {}
 pub type AXUIElementRef = *const __AXUIElement;
-
-pub unsafe fn cfstring_ref(s: CFStringRef) -> CFString {
-    // 定数 CFStringRef を安全にラップ
-    CFString::wrap_under_get_rule(s as *const _)
-}
 
 unsafe fn copy_attr(element: AXUIElementRef, key: CFStringRef) -> Option<CFTypeRef> {
     let mut out: CFTypeRef = std::ptr::null();
@@ -235,16 +219,4 @@ pub unsafe fn set_cgpoint(elem: AXUIElementRef, key: CFStringRef, p: CGPoint) ->
 
 pub unsafe fn set_cgsize(elem: AXUIElementRef, key: CFStringRef, s: CGSize) -> bool {
     set_ax(AXValueType::CGSize, elem, key, s).is_ok()
-}
-
-pub fn ensure_ax_trusted() -> bool {
-    unsafe {
-        // 許可ダイアログを出す
-        let key = cfstring_ref(get_kAXTrustedCheckOptionPrompt());
-        let dict = CFDictionary::from_CFType_pairs(&[(
-            key.as_CFType(),
-            CFBoolean::true_value().as_CFType(),
-        )]);
-        AXIsProcessTrustedWithOptions(dict.as_concrete_TypeRef() as CFDictionaryRef) != 0
-    }
 }
